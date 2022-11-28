@@ -2,7 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import Root from "./routes/root";
 import ImageCompare from './components/Image-Compare';
-import CompareBox from './components/Compare_Box';
 import {
     createBrowserRouter,
     RouterProvider,
