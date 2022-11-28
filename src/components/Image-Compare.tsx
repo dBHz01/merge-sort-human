@@ -1,6 +1,9 @@
-import * as React from 'react';
-import Root from "../routes/root";
-import { Image } from 'antd'
+import React, { createContext, useReducer, useState } from 'react'
+import { Button, Result, Input } from 'antd'
+import { Debugout } from 'debugout.js';
+import CompareBox from './Compare_Box';
+
+const bugout = new Debugout({ useTimestamps: true, realTimeLoggingOn: true });
 
 export interface Props {
     name?: string;
@@ -9,32 +12,191 @@ export interface Props {
     id?: number;
 }
 
-class Hello extends React.Component<Props, object> {
-    render() {
-        const { name="0", enthusiasmLevel = 1,url = "data:image/png;base64,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",id=0} = this.props;
+export interface ContextProps {
+    checkedId: number | string;
+    setCheckedId: React.Dispatch<React.SetStateAction<number>>;
+}
+export const MyContext = createContext({} as ContextProps);
 
-        if (enthusiasmLevel <= 0) {
-            throw new Error('You could be a little more enthusiastic. :D');
-        }
+const ImageCompare: React.FC<Props> = (props) => {
 
-        return (
-            <div className="hello">
-                <div className="greeting">
-                    Hello {name + getExclamationMarks(enthusiasmLevel)}
-                </div>
-                <Image
-                    width={200}
-                    src={url}
-                />
-            </div>
-        );
+    const IMGLABLES = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    const IMGS = IMGLABLES.map((a) => { return [`https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/${a}.jpg`] });
+    // [["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/0.jpg"],
+    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/1.jpg"],
+    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/2.jpg"],
+    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/3.jpg"],
+    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/4.jpg"],
+    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/5.jpg"],
+    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/6.jpg"],
+    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/7.jpg"],
+    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/8.jpg"]];
+
+    const [checkedId, setCheckedId] = useState<number>(0);
+    const [showResult, setShowResult] = useState<boolean>(false);
+    const [startExperiment, setStartExperiment] = useState<boolean>(false);
+    const [username, setUsername] = useState<string>("");
+    const [department, setDepartment] = useState<string>("");
+    const [studentId, setStudentId] = useState<string>("");
+
+    function genTask(imgs: Array<Array<string>>): [Array<string>, Array<string>] | undefined {
+        if (imgs.length <= 1) return;
+        imgs.sort((a, b) => { return a.length - b.length });
+        let returnImgs: [Array<string>, Array<string>] = [imgs[0], imgs[1]];
+        // console.log(imgs);
+        // imgs = imgs.slice(2);
+        return returnImgs;
     }
+
+    function debug() {
+        console.log(state);
+    }
+
+    const reducer = (state: any, action: any) => {
+        let actionList = action.split(" ");
+        let actionType = actionList[0];
+        let actionContent = actionList.slice(1);
+        switch (actionType) {
+            case "start":
+                console.log("start");
+                setStartExperiment(true);
+                let tasks = genTask(IMGS);
+                return {
+                    ...state,
+                    tasks0: tasks![0],
+                    tasks1: tasks![1],
+                    imgs: IMGS.slice(2),
+                }
+            case "left":
+                bugout.log("left");
+                if (state.tasks0.length == 1) {
+                    console.log(state);
+                    if (state.imgs.length == 0) {
+                        console.log("end");
+                        let result = state.mergedTask.concat(state.tasks0).concat(state.tasks1);
+                        bugout.log("result", result.map((a) => { return a.split("com/")[1] }));
+                        // bugout.downloadLog();
+                        setShowResult(true);
+                        return {
+                            ...state,
+                            imgs: state.mergedTask.concat(state.tasks0).concat(state.tasks1),
+                        }
+                    } else {
+                        let newImgs = state.imgs;
+                        newImgs.push(state.mergedTask.concat(state.tasks0).concat(state.tasks1));
+                        let tasks = genTask(newImgs);
+                        return {
+                            ...state,
+                            tasks0: tasks![0],
+                            tasks1: tasks![1],
+                            mergedTask: [],
+                            imgs: newImgs.slice(2),
+                        }
+                    }
+                } else {
+                    let newMergedTask = state.mergedTask;
+                    newMergedTask.push(state.tasks0[0]);
+                    let newTasks0 = state.tasks0.slice(1);
+                    // console.log(state)
+                    return {
+                        ...state,
+                        mergedTask: newMergedTask,
+                        tasks0: newTasks0,
+                    }
+                }
+            case "right":
+                bugout.log("right");
+                if (state.tasks1.length == 1) {
+                    if (state.imgs.length == 0) {
+                        console.log("end");
+                        let result = state.mergedTask.concat(state.tasks1).concat(state.tasks0);
+                        bugout.log("result", result.map((a) => { return a.split("com/")[1] }));
+                        // bugout.downloadLog();
+                        setShowResult(true);
+                        return {
+                            ...state,
+                            imgs: state.mergedTask.concat(state.tasks1).concat(state.tasks0),
+                        }
+                    } else {
+                        let newImgs = state.imgs;
+                        newImgs.push(state.mergedTask.concat(state.tasks1).concat(state.tasks0));
+                        let tasks = genTask(newImgs);
+                        return {
+                            ...state,
+                            tasks0: tasks![0],
+                            tasks1: tasks![1],
+                            mergedTask: [],
+                            imgs: newImgs.slice(2),
+                        }
+                    }
+                } else {
+                    let newMergedTask = state.mergedTask;
+                    newMergedTask.push(state.tasks1[0]);
+                    let newTasks0 = state.tasks1.slice(1);
+                    return {
+                        ...state,
+                        mergedTask: newMergedTask,
+                        tasks1: newTasks0,
+                    }
+                }
+            default:
+                break;
+        }
+    }
+
+    const [state, dispatch] = useReducer(reducer, { tasks0: [], tasks1: [], mergedTask: [], imgs: [] });
+
+    return (
+        <div>
+            {
+                startExperiment ?
+                    <div>
+                        {
+                            !showResult ?
+                                <div>
+                                    <MyContext.Provider value={{ checkedId, setCheckedId }}>
+                                        <CompareBox url1={state.tasks0.length > 0 ? state.tasks0[0] : ""} url2={state.tasks1.length > 0 ? state.tasks1[0] : ""} dispatch={dispatch}></CompareBox>
+                                    </MyContext.Provider>
+                                    {/* <Button type="primary" onClick={() => {
+                                        if (checkedId) {
+                                            dispatch(checkedId);
+                                            setCheckedId(0);
+                                        } else {
+                                            console.log(`error with ${checkedId}`);
+                                        }
+                                    }}>确认</Button> */}
+
+                                    <Button onClick={() => { debug(); }}>debug</Button>
+                                </div> : <Result
+                                    status="success"
+                                    title="实验完成！请下载数据"
+                                    subTitle="请点击下载数据按钮，并将下载的数据发送给主试。请勿直接离开！"
+                                    extra={[
+                                        <Button type="primary" key="console" onClick={() => { bugout.downloadLog(); }}>
+                                            下载数据
+                                        </Button>,
+                                    ]}
+                                />
+                        }
+                    </div> : <div>
+                        <h1>请输入基本信息</h1>
+                        <span>
+                            <p>姓名</p>
+                            <Input placeholder="张三" onChange={e => { setUsername(e.target.value) }} maxLength={20} />
+                        </span>
+                        <span>
+                            <p>学号</p>
+                            <Input placeholder="2019010001" onChange={e => { setStudentId(e.target.value) }} maxLength={20} />
+                        </span>
+                        <span>
+                            <p>院系</p>
+                            <Input placeholder="洗衣机系" onChange={e => { setDepartment(e.target.value) }} maxLength={20} />
+                        </span>
+                        <Button onClick={() => { dispatch('start'); bugout.log("info", username, studentId, department); }} className="submit-button">提交</Button>
+                    </div>
+            }
+        </div>
+    );
 }
 
-export default Hello;
-
-// helpers
-
-function getExclamationMarks(numChars: number) {
-    return Array(numChars + 1).join('!');
-}
+export default ImageCompare;

@@ -1,13 +1,16 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import Root from "./routes/root";
-import Hello from './components/Image-Compare';
+import ImageCompare from './components/Image-Compare';
+import CompareBox from './components/Compare_Box';
 import {
     createBrowserRouter,
     RouterProvider,
     Route,
 } from "react-router-dom";
 import './index.css'
+import Score from './components/Score';
+
 
 const router = createBrowserRouter([
     {
@@ -15,16 +18,19 @@ const router = createBrowserRouter([
         element: <Root />,
         children: [
             {
-                path: "/hello",
-                element: <Hello name='ts' enthusiasmLevel={10} />,
+                path: "/compare",
+                element: <ImageCompare />,
+            },
+            {
+                path: "/score",
+                element: <Score />,
             },
         ],
     },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-    <React.StrictMode>
-        {/* <App /> */}
+    // <React.StrictMode>
         <RouterProvider router={router} />
-    </React.StrictMode>
+    // </React.StrictMode>
 )

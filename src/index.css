@@ -383,3 +383,20 @@ html {
     justify-content: center;
     width: 100%;
   }
+
+  .compare-box {
+    border-radius: 10px;
+    margin: 50px;
+  }
+
+  .compare-radio {
+    margin-top: 10px;
+  }
+
+  .submit-button {
+    margin-top: 20px;
+  }
+
+  .input-number {
+    margin-left: 20px;
+  }

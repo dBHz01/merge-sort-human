@@ -8,10 +8,10 @@ export default function Root() {
                 <nav>
                     <ul>
                         <li>
-                            <Link to={`hello`}>Your Name</Link>
+                            <Link to={`compare`}>图片对比任务</Link>
                         </li>
                         <li>
-                            <Link to={`contacts/2`}>Your Friend</Link>
+                            <Link to={`score`}>图片打分任务</Link>
                         </li>
                     </ul>
                 </nav>
