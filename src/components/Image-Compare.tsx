@@ -19,25 +19,35 @@ export interface ContextProps {
 export const MyContext = createContext({} as ContextProps);
 
 const ImageCompare: React.FC<Props> = (props) => {
-
-    const IMGLABLES = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-    const IMGS = IMGLABLES.map((a) => { return [`https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/${a}.jpg`] });
-    // [["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/0.jpg"],
-    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/1.jpg"],
-    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/2.jpg"],
-    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/3.jpg"],
-    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/4.jpg"],
-    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/5.jpg"],
-    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/6.jpg"],
-    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/7.jpg"],
-    // ["https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/8.jpg"]];
-
     const [checkedId, setCheckedId] = useState<number>(0);
     const [showResult, setShowResult] = useState<boolean>(false);
     const [startExperiment, setStartExperiment] = useState<boolean>(false);
     const [username, setUsername] = useState<string>("");
     const [department, setDepartment] = useState<string>("");
     const [studentId, setStudentId] = useState<string>("");
+    const [experimentId, setExperimentId] = useState<number>(0);
+
+    const people = "azd crj cyy djy frw lly lzj tty xq ylc ytj zyx lyf zyw zxy lgz lbc hmf zhp ywt dyc jjx xtx wzz".split(" ");
+
+    const [IMGS, setIMGS] = useState<Array<Array<string>>>([]);
+
+    function shuffle<T>(array: T[]): T[] {
+        let currentIndex = array.length, randomIndex;
+
+        // While there remain elements to shuffle.
+        while (currentIndex != 0) {
+
+            // Pick a remaining element.
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+
+            // And swap it with the current element.
+            [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
+        }
+
+        return array;
+    };
 
     function genTask(imgs: Array<Array<string>>): [Array<string>, Array<string>] | undefined {
         if (imgs.length <= 1) return;
@@ -52,6 +62,16 @@ const ImageCompare: React.FC<Props> = (props) => {
         console.log(state);
     }
 
+    function genImgs() {
+        let IMGLABLES = [];
+        for (let p of people) {
+            IMGLABLES.push(`folder/${p}/${p}-office-${experimentId}.jpeg`);
+            IMGLABLES.push(`CNET-imgs/${p}/${p}-cnet-${experimentId}.png`);
+        }
+        IMGLABLES = shuffle(IMGLABLES);
+        setIMGS(IMGLABLES.map((a) => { return [`https://auto-ppt-data.oss-cn-zhangjiakou.aliyuncs.com/${a}`] }));
+    }
+
     const reducer = (state: any, action: any) => {
         let actionList = action.split(" ");
         let actionType = actionList[0];
@@ -60,6 +80,7 @@ const ImageCompare: React.FC<Props> = (props) => {
             case "start":
                 console.log("start");
                 setStartExperiment(true);
+
                 let tasks = genTask(IMGS);
                 return {
                     ...state,
@@ -166,7 +187,7 @@ const ImageCompare: React.FC<Props> = (props) => {
                                         }
                                     }}>确认</Button> */}
 
-                                    <Button onClick={() => { debug(); }}>debug</Button>
+                                    {/* <Button onClick={() => { debug(); }}>debug</Button> */}
                                 </div> : <Result
                                     status="success"
                                     title="实验完成！请下载数据"
@@ -192,7 +213,11 @@ const ImageCompare: React.FC<Props> = (props) => {
                             <p>院系</p>
                             <Input placeholder="洗衣机系" onChange={e => { setDepartment(e.target.value) }} maxLength={20} />
                         </span>
-                        <Button onClick={() => { dispatch('start'); bugout.log("info", username, studentId, department); }} className="submit-button">提交</Button>
+                        <span>
+                            <p>实验序号</p>
+                            <Input placeholder="0" onChange={e => { setExperimentId(parseInt(e.target.value)) }} maxLength={20} />
+                        </span>
+                        <Button onClick={() => { genImgs(); dispatch('start'); bugout.log("info", username, studentId, department); }} className="submit-button">提交</Button>
                     </div>
             }
         </div>
